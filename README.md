@@ -1,0 +1,1 @@
+# aws-highly-available-one-tier-architecture
