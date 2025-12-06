@@ -1,0 +1,142 @@
+{
+  "stackName": "WebApp-Prod-MultiAZ-1TierInfra",
+  "environment": {
+    "name": "production",
+    "region": "us-east-1"
+  },
+  "tags": {
+    "Project": "HighlyAvailable1Tier",
+    "ManagedBy": "CDK",
+    "CostCenter": "Engineering",
+    "Owner": "DevOps",
+    "Environment": "Production"
+  },
+  "resourceNames": {
+    "vpc": "WebApp-Prod-MultiAZ-1TierInfra-Vpc",
+    "albSecurityGroup": "WebApp-Prod-MultiAZ-1TierInfra-AlbSecurityGroup",
+    "asgSecurityGroup": "WebApp-Prod-MultiAZ-1TierInfra-AsgSecurityGroup",
+    "publicNetworkAcl": "WebApp-Prod-MultiAZ-1TierInfra-PublicNetworkAcl",
+    "privateNetworkAcl": "WebApp-Prod-MultiAZ-1TierInfra-PrivateNetworkAcl",
+    "applicationLoadBalancer": "WebApp-Prod-MultiAZ-1TierInfra-ApplicationLoadBalancer",
+    "targetGroup": "WebApp-Prod-MultiAZ-1TierInfra-WebAppTargetGroup",
+    "httpListener": "WebApp-Prod-MultiAZ-1TierInfra-HttpListener",
+    "autoScalingGroup": "WebApp-Prod-MultiAZ-1TierInfra-WebAppAutoScalingGroup",
+    "launchTemplate": "WebApp-Prod-MultiAZ-1TierInfra-LaunchTemplate",
+    "cpuScalingPolicy": "WebApp-Prod-MultiAZ-1TierInfra-CpuScaling",
+    "vpcFlowLogsGroup": "WebApp-Prod-MultiAZ-1TierInfra-VpcFlowLogsGroup",
+    "vpcFlowLog": "WebApp-Prod-MultiAZ-1TierInfra-VpcFlowLog"
+  },
+  "network": {
+    "vpc": {
+      "cidr": "10.0.0.0/16",
+      "maxAzs": 3,
+      "natGatewaysCount": 3,
+      "subnetCidrMask": 24,
+      "enableFlowLogs": true,
+      "flowLogsRetentionDays": 30,
+      "subnets": {
+        "publicSubnetName": "Public",
+        "privateSubnetName": "Private"
+      },
+      "flowLogs": {
+        "trafficType": "ALL",
+        "logGroupRemovalPolicy": "RETAIN"
+      }
+    },
+    "security": {
+      "allowHttpFrom": "0.0.0.0/0",
+      "httpPort": 80,
+      "httpsPort": 443,
+      "albAllowAllOutbound": false,
+      "asgAllowAllOutbound": false,
+      "allowPackageDownloads": true
+    },
+    "networkAcls": {
+      "enabled": true,
+      "rules": {
+        "httpInboundRuleNumber": 100,
+        "enableHttpInbound": true,
+        "httpsInboundRuleNumber": 105,
+        "enableHttpsInbound": true,
+        "ephemeralInboundRuleNumber": 110,
+        "enableEphemeralInbound": true,
+        "allOutboundRuleNumber": 100,
+        "enableAllOutbound": true,
+        "privateHttpRuleNumber": 100,
+        "enablePrivateHttpInbound": true,
+        "privateEphemeralRuleNumber": 110,
+        "enablePrivateEphemeralInbound": true,
+        "enablePrivateAllOutbound": true
+      },
+      "ephemeralPorts": {
+        "start": 1024,
+        "end": 65535
+      }
+    }
+  },
+  "compute": {
+    "alb": {
+      "internetFacing": true,
+      "deletionProtection": true,
+      "idleTimeout": 60,
+      "http2Enabled": true,
+      "deregistrationDelay": 30,
+      "targetGroupPort": 80,
+      "targetGroupProtocol": "HTTP",
+      "targetType": "INSTANCE",
+      "listenerPort": 80,
+      "listenerProtocol": "HTTP",
+      "healthCheck": {
+        "enabled": true,
+        "path": "/",
+        "protocol": "HTTP",
+        "interval": 30,
+        "timeout": 5,
+        "healthyThresholdCount": 2,
+        "unhealthyThresholdCount": 3,
+        "port": "80"
+      }
+    },
+    "asg": {
+      "minCapacity": 3,
+      "maxCapacity": 10,
+      "desiredCapacity": 3,
+      "instanceClass": "T3",
+      "instanceSize": "SMALL",
+      "machineImageType": "AMAZON_LINUX_2023",
+      "healthCheckType": "ELB",
+      "healthCheckGracePeriod": 300,
+      "cooldown": 300,
+      "targetCpuUtilization": 60,
+      "requireImdsv2": true,
+      "subnetType": "PRIVATE_WITH_EGRESS",
+      "scaleInCooldown": 300,
+      "scaleOutCooldown": 60
+    },
+    "storage": {
+      "volumeSize": 30,
+      "volumeType": "GP3",
+      "iops": 3000,
+      "encrypted": true,
+      "deleteOnTermination": true,
+      "deviceName": "/dev/xvda"
+    }
+  },
+  "monitoring": {
+    "enableDetailedMonitoring": true,
+    "metricCollectionGranularity": "1Minute",
+    "cloudWatchLogsRetention": 30
+  },
+  "outputs": {
+    "exportPrefix": "WebApp-Prod-MultiAZ-1TierInfra",
+    "enabled": {
+      "vpcId": true,
+      "vpcCidr": true,
+      "loadBalancerDns": true,
+      "loadBalancerArn": true,
+      "applicationUrl": true,
+      "autoScalingGroupName": true,
+      "autoScalingGroupArn": true
+    }
+  }
+}
